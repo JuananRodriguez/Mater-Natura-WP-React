@@ -26,7 +26,7 @@ const Slide = Styled('div')`
   left: 0;
   position: absolute;
   transform: translateX(${p=>p.left}%);
-  background: ${p=>p.backgroundColor}
+  background: white;
   
   &.prev{
     transform: translateX(-100%);
@@ -47,7 +47,7 @@ class Swiper extends React.Component{
     super(props)
     this.Swipe = null;
     this.Ghost = null;
-    this.state = { withTransition:true, page:1, clientX : 0,  clientEnterX : 0, clientY : 0,  clientEnterY : 0, width: 0, height: 0 }
+    this.state = { withTransition:true, page:this.props.initialPage, clientX : 0,  clientEnterX : 0, clientY : 0,  clientEnterY : 0, width: 0, height: 0 }
   }
 
   componentDidMount(){
@@ -112,15 +112,6 @@ class Swiper extends React.Component{
 
 
   end = () => {
-    setTimeout(()=> {
-      if (this.state.clientX < -45 && this.props.onLeft)
-        console.log('on Left')
-
-      else if (this.state.clientX > 45 && this.props.onRight)
-        console.log('on Right')
-    },200);
-
-
     this.setState({
       clientX: this.state.clientX < -45 ? -100 : this.state.clientX > 45 ? 100 : 0,
       clientY: 0,
@@ -129,6 +120,16 @@ class Swiper extends React.Component{
   }
 
   calcView = (page) =>{
+
+    setTimeout(()=> {
+      if (this.state.page + 1 === page && this.props.onLeft)
+        this.props.onLeft(this.state.page + 1)
+
+      else if (this.state.page - 1 === page && this.props.onRight)
+        this.props.onRight(this.state.page - 1)
+    },200);
+
+
     setTimeout(()=>this.setState({
       withTransition: false,
       clientX: 0,
@@ -141,34 +142,15 @@ class Swiper extends React.Component{
     }),300);
   }
 
-  buildContent = () =>{
-    const {children} = this.props;
-    const toReturn = [];
-
-    children.forEach((d, i) =>{
-      if(i === this.state.page){
-        if(children[i-1])
-          toReturn.push(<Slide key={'prev-slide'} className={'prev'}> {children[i-1]} </Slide>);
-
-        toReturn.push(<Slide key={'current-slide'} className={'current'}> {d} </Slide>);
-
-        if(children[i+1])
-          toReturn.push(<Slide key={'next-slide'} className={'next'}> {children[i+1]} </Slide>);
-      }
-    })
-
-    return toReturn;
-
-
-  }
-
   render(){
+    const {children} = this.props;
+    const {page, withTransition, clientX} = this.state;
     return(
       <Wrapper>
         <span ref={(node)=> this.Ghost = node}/>
         <Example
-          transition={this.state.withTransition}
-          left={this.state.clientX}
+          transition={withTransition}
+          left={clientX}
           ref={(node)=> this.Swipe = node}
           draggable={true}
           onDragStart={this.dragStart}
@@ -177,13 +159,14 @@ class Swiper extends React.Component{
           onTouchMove={this.touchMove}
 
 
-
-
-
           onDragEnd ={this.end}
           onTouchEnd={this.end}
         >
-          {this.buildContent()}
+
+          { children[page-1] && <Slide key={'prev-slide'} className={'prev'}> { children[page-1] } </Slide> }
+          { <Slide key={'current-slide'} className={'current'}> { children[page] } </Slide> }
+          { children[page+1] && <Slide key={'next-slide'} className={'next'}> { children[page+1] } </Slide> }
+
         </Example>
       </Wrapper>
     )
@@ -193,6 +176,7 @@ class Swiper extends React.Component{
 
 Swiper.defaultProps = {
   data: [<p>Something</p>,<p>Something2</p>,<p>Something3</p>],
+  initialPage: 0,
   onLeft: () => {},
   onRight: () => {},
 }
