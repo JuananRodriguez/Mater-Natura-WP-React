@@ -59,7 +59,7 @@ class Swiper extends React.Component{
     }
   }
 
-  // On desktop
+  /*** On desktop ***/
   dragStart = (e) =>{
     this.setState({
       clientEnterX: e.pageX,
@@ -75,13 +75,14 @@ class Swiper extends React.Component{
 
     if(e.pageX !== 0)
       this.setState({
-        clientX: (e.pageX - this.state.clientEnterX) * 100 / this.Swipe.offsetWidth,
+        clientX: this.calcMove(e.pageX),
         clientY: e.pageY - this.state.clientEnterY,
       })
   }
 
 
-  // On Mobile
+
+  /*** On Mobile ***/
   touchMoveStart = (e) =>{
     this.setState({
       clientEnterX: e.touches[0].pageX,
@@ -94,12 +95,32 @@ class Swiper extends React.Component{
     e.stopPropagation();
 
     this.setState({
-      clientX: (e.touches[0].pageX - this.state.clientEnterX) * 100 / this.Swipe.offsetWidth,
+      clientX: this.calcMove(e.touches[0].pageX),
       clientY: e.touches[0].pageY - this.state.clientEnterY,
     })
   }
 
+  /***** Commons Functions ****/
+
+  calcMove(positionX){
+    const result = (positionX - this.state.clientEnterX) * 100 / this.Swipe.offsetWidth;
+    if ( result < 0 && this.props.children[this.state.page + 1] ||
+      result > 0 && this.props.children[this.state.page - 1] )
+      return result;
+    return this.state.clientX;
+  }
+
+
   end = () => {
+    setTimeout(()=> {
+      if (this.state.clientX < -45 && this.props.onLeft)
+        console.log('on Left')
+
+      else if (this.state.clientX > 45 && this.props.onRight)
+        console.log('on Right')
+    },200);
+
+
     this.setState({
       clientX: this.state.clientX < -45 ? -100 : this.state.clientX > 45 ? 100 : 0,
       clientY: 0,
@@ -171,7 +192,9 @@ class Swiper extends React.Component{
 
 
 Swiper.defaultProps = {
-  data: [<p>Something</p>,<p>Something2</p>,<p>Something3</p>]
+  data: [<p>Something</p>,<p>Something2</p>,<p>Something3</p>],
+  onLeft: () => {},
+  onRight: () => {},
 }
 
 export default Swiper;
