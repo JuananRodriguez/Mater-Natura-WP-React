@@ -1,0 +1,52 @@
+---
+name: Utils
+menu: Models
+---
+
+# Utils
+
+Every model / class extends from the Utils class. This is useful for sharing data filtering and processing functions.  
+The functions of this class are as follows:
+
+## getData
+This function allows two possibilities depending on how we use it:
+
+- Use it as a function without parameters, which will return an 
+object with the values of the class and its keys according to the model of the constructor.
+For Example:
+```javascript
+const model = {name: '', surname: '', hobbies: []};
+const Instance = new NameOfClass(model);
+Instance.name = 'any string';
+Instance.getData();
+/** Output:
+* 
+* {
+*   name: 'any string',
+*   surname: '',
+*   hobbies: [] 
+* }
+* 
+* */
+```
+
+- Filter by keys, which will return an object with the values of the class and its keys 
+according to the array of strings passed as parameter.
+For Example ( Follow the previous example)
+```javascript
+Instance.getData('name'); //{ name: 'any string' }
+
+Instance.getData(['name','hobbies']); //{ name: 'any string', hobbies: [] }
+
+/** It doesn't return keys no included in model */
+Instance.getData(['name','hobbies', 'props']); //{ name: 'any string', hobbies: [] }
+```
+
+## filter
+Filter by keys, which will return an object with the values of the class and its keys 
+according to the array of strings passed as parameter.
+It's like use *Instance.getData(**parameters**)*, so the example it's the same too.
+
+## toJson 
+Simply, return a JSON object with the values of the class and its keys according to the model of the constructor.
+It's like use *Instance.getData()*, so the example it's the same too.

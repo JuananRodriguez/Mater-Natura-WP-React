@@ -1,0 +1,22 @@
+---
+name: Introduction
+menu: Models
+---
+
+# Models
+
+All the data management of the application is done through classes created from models, 
+which we find in the src/models folder.
+
+As a rule, every model will extend the Utils.js class, which provides the model in 
+question with functions for its handling ( to Json(), filter(), getData()... ) 
+
+On the other hand, the constructor of the model is also atypical. we will use an array 
+of object (each attribute of the class) that we will pass to the constructor of Utils 
+(Super) which will be the one in charge of creating our class correctly.
+
+Any other function or attibutes of the class must be created in the same class. 
+For example, the translations of the keys of the attributes.
+
+You can see the functions contained in the utils class in the documentation, 
+in Utils, and how to create a new class correctly in How to create new model.

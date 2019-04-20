@@ -1,0 +1,62 @@
+---
+name: Creating models
+menu: Models
+---
+import Import from '../helperComponents/Import'
+
+# How to create a new model
+
+Every model / class extends from the Utils class.  
+Follow this steps:
+
+## Step 1
+Defines an expected model. This is an array of objects with key and defaultValue.
+Key will be the name of the attribute in the class, and defaultValue its default 
+value if none has been sent to it when built (constructor).
+
+Example:
+```javascript
+/** Model by keys and values expected */
+const ModelExpected = [
+    {key: '_id', defaultValue: ''},
+    {key: 'name', defaultValue: ''},
+    {key: 'surname', defaultValue: ''},
+    {key: 'email', defaultValue: ''},
+    {key: 'other', defaultValue: ''},
+    {key: 'roles', defaultValue: []},
+    {key: 'groups', defaultValue: []},
+];
+```
+
+## Step 2
+Import the Utils class and create a new class extending from it.
+<Import name='Utils' route='Utils' type='Model'/>
+
+Create class **extending from the Utils class**:
+```javascript
+class Index extends Utils{
+
+    constructor( obj = {} ){
+        /** Send to utils class the Model and the object passed for build this class */
+        super(ModelExpected, obj);
+    }
+}
+```
+
+## Step 3
+Add the elements of the class, such as translations...
+```javascript
+/** Translations defined by model keys*/
+    translations = {
+        _id :  (
+            <FormattedMessage
+                id="users.model._id"
+                defaultMessage="Id"
+                description="Text of _id property in Reducer"
+            />
+        ),
+        ...others
+    }
+```
+
+## That All!

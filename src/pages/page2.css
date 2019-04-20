@@ -1,0 +1,40 @@
+.post {
+    position: absolute;
+    height: 90vh;
+    width: 100%;
+    transition: transform 500ms;
+}
+
+.WrapperPosts{
+    /*width: 100%;*/
+    height: -webkit-fill-available;
+    position: relative;
+    overflow-x: hidden;
+}
+
+.orange {
+    background-color: coral;
+}
+
+.green {
+    background-color: greenyellow;
+}
+
+.blue {
+    background-color: deepskyblue;
+}
+
+.prev {
+    z-index: 700;
+    transform: translateX(-100%);
+}
+
+.next {
+    z-index: 900;
+    transform: translateX(100%);
+}
+
+.active{
+    z-index: 800;
+    transform: translateX(0);
+}
