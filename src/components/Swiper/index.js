@@ -10,10 +10,10 @@ const Wrapper = Styled('section')`
 const Example = Styled('div')`
   // width: 100vw;
   height: 100%;
-  transform: translateX(${p=>p.left}px);
+  transform: translateX(${p=>p.left}%);
   // overflow: hidden;
   position: relative;
-  transition: transform 100ms
+  ${p=> p.transition && `transition: transform 100ms`};
 `;
 
 const Slide = Styled('div')`
@@ -25,7 +25,7 @@ const Slide = Styled('div')`
   top: 0;
   left: 0;
   position: absolute;
-  transition: transform 100ms;
+  transform: translateX(${p=>p.left}%);
   background: ${p=>p.backgroundColor}
   
   &.prev{
@@ -46,15 +46,8 @@ class Swiper extends React.Component{
   constructor(props){
     super(props)
     this.Swipe = null;
-    this.state = {
-      clientX : 0,
-      clientEnterX : 0,
-      clientY : 0,
-      clientEnterY : 0,
-
-      width: 0,
-      height: 0,
-    }
+    this.Ghost = null;
+    this.state = { withTransition:true, page:1, clientX : 0,  clientEnterX : 0, clientY : 0,  clientEnterY : 0, width: 0, height: 0 }
   }
 
   componentDidMount(){
@@ -67,18 +60,13 @@ class Swiper extends React.Component{
   }
 
   // On desktop
-
   dragStart = (e) =>{
-
     this.setState({
       clientEnterX: e.pageX,
       clientEnterY: e.pageY,
     })
-
-    // const crt = this.Swipe.cloneNode(true);
-    // crt.style.opacity = 0; /* or visibility: hidden, or any of the above */
-    // document.body.appendChild(crt);
-    // e.dataTransfer.setDragImage(crt, 0, 0);
+    this.Ghost.style.opacity = 0;
+    e.dataTransfer.setDragImage(this.Ghost, 0, 0);
   }
 
   drag = (e) =>{
@@ -87,7 +75,7 @@ class Swiper extends React.Component{
 
     if(e.pageX !== 0)
       this.setState({
-        clientX: e.pageX - this.state.clientEnterX,
+        clientX: (e.pageX - this.state.clientEnterX) * 100 / this.Swipe.offsetWidth,
         clientY: e.pageY - this.state.clientEnterY,
       })
   }
@@ -104,26 +92,61 @@ class Swiper extends React.Component{
   touchMove = (e) => {
     e.preventDefault();
     e.stopPropagation();
+
     this.setState({
-      clientX: e.touches[0].pageX - this.state.clientEnterX,
+      clientX: (e.touches[0].pageX - this.state.clientEnterX) * 100 / this.Swipe.offsetWidth,
       clientY: e.touches[0].pageY - this.state.clientEnterY,
     })
   }
 
   end = () => {
-    if(Math.abs(this.state.clientX * 100 / this.state.width) > 40)
-      alert('debería cambiar de diapo')
-
     this.setState({
+      clientX: this.state.clientX < -45 ? -100 : this.state.clientX > 45 ? 100 : 0,
+      clientY: 0,
+    }, () => this.calcView (this.state.clientX < -45 ? this.state.page + 1 : this.state.clientX > 45 ? this.state.page - 1 : this.state.page))
+
+  }
+
+  calcView = (page) =>{
+    setTimeout(()=>this.setState({
+      withTransition: false,
       clientX: 0,
       clientY: 0,
+      page: page,
+    }),200);
+
+    setTimeout(()=> this.setState({
+      withTransition: true
+    }),300);
+  }
+
+  buildContent = () =>{
+    const {children} = this.props;
+    const toReturn = [];
+
+    children.forEach((d, i) =>{
+      if(i === this.state.page){
+        if(children[i-1])
+          toReturn.push(<Slide key={'prev-slide'} className={'prev'}> {children[i-1]} </Slide>);
+
+        toReturn.push(<Slide key={'current-slide'} className={'current'}> {d} </Slide>);
+
+        if(children[i+1])
+          toReturn.push(<Slide key={'next-slide'} className={'next'}> {children[i+1]} </Slide>);
+      }
     })
+
+    return toReturn;
+
+
   }
 
   render(){
     return(
       <Wrapper>
+        <span ref={(node)=> this.Ghost = node}/>
         <Example
+          transition={this.state.withTransition}
           left={this.state.clientX}
           ref={(node)=> this.Swipe = node}
           draggable={true}
@@ -131,23 +154,24 @@ class Swiper extends React.Component{
           onTouchStart={this.touchMoveStart}
           onDrag={this.drag}
           onTouchMove={this.touchMove}
+
+
+
+
+
           onDragEnd ={this.end}
           onTouchEnd={this.end}
         >
-          Client X = {this.state.clientX}
-          Client Y = {this.state.clientY}
-          Client Enter X  = {this.state.clientEnterX}
-          Client Enter Y = {this.state.clientEnterY}
-
-
-          <Slide backgroundColor={'red'} className={'prev'} />
-          <Slide backgroundColor={'green'} className={'current'} />
-          <Slide backgroundColor={'orange'} className={'next'}/>
-
+          {this.buildContent()}
         </Example>
       </Wrapper>
     )
   }
+}
+
+
+Swiper.defaultProps = {
+  data: [<p>Something</p>,<p>Something2</p>,<p>Something3</p>]
 }
 
 export default Swiper;
